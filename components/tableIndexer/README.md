@@ -1,0 +1,4 @@
+Requirments:
+
+
+brew install poppler
