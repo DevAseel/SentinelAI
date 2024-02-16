@@ -9,6 +9,7 @@ from utils.logger import setup_logging
 from utils.img_processing import MaxResize, outputs_to_objects
 import logging
 import json
+import os
 
 
 def parse_args():
@@ -33,15 +34,36 @@ def parse_args():
         default="microsoft/table-transformer-detection",
         help="Set the table detection model",
     )
+    parser.add_argument(
+        "--json",
+        dest="save the output as a json file",
+        default=False,
+        help="set the json output preference",
+    )
+    parser.add_argument(
+        "--json-path",
+        dest="specify the json path",
+        default="./outputs/scanned_tables_json",
+        help="set the output path of the json file",
+    )
+
     return parser.parse_args()
 
 
 class TablesScanner:
-    def __init__(self, img_path, model_name="microsoft/table-transformer-detection"):
+    def __init__(
+        self,
+        img_path,
+        model_name="microsoft/table-transformer-detection",
+        json=False,
+        json_path="./outputs/scanned_tables_json",
+    ):
         self.img_path = img_path
         self.model_load_time = 0
         self.model_name = model_name
         self.model = self.load_model()
+        self.json = json
+        self.json_path = json_path
 
     def load_model(self):
         start_time = time.time()
@@ -103,6 +125,18 @@ class TablesScanner:
                 "process duration": f"{elapsed_time:.2f}s",
                 "data": objects,
             }
+            if json:
+                image_name, image_ext = os.path.splitext(
+                    os.path.basename(self.img_path)
+                )
+
+                if not os.path.exists(self.json_path):
+                    os.makedirs(self.json_path)
+
+                with open(f"{self.json_path}/{image_name}.json", "w") as json_file:
+                    json.dump(output, json_file, indent=4)
+
+                logging.debug(f"✔️  json file created.")
 
             logging.info(f"{json.dumps(output, indent=2)}")
 
