@@ -4,6 +4,7 @@ import os
 import logging
 import sys
 import json
+from utils.logger import setup_logging
 
 
 def parse_args():
@@ -160,7 +161,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     # Set up logging based on the command-line argument
-    logging.basicConfig(level=args.log_level.upper())
+    setup_logging(args.log_level.upper())
 
     # Example usage:
     table_cropper = TableCropper(
