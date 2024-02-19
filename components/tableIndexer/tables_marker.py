@@ -186,7 +186,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     # Set up logging based on the command-line argument
-    setup_logging(args.log_level)
+    setup_logging(args.log_level.upper())
 
     # Example usage:
     table_marker = TableMarker(args.img_path, args.json_path, args.output_path)

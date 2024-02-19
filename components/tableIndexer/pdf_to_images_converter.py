@@ -67,7 +67,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     # Set up colorful logging based on the command-line argument
-    setup_logging(args.log_level)
+    setup_logging(args.log_level.upper())
 
     # Example usage:
     convert_pdf_to_images(

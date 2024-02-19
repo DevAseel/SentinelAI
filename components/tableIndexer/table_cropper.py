@@ -1,103 +1,170 @@
+import argparse
 from PIL import Image
 import os
-import time
+import logging
+import sys
+import json
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Crop tables in an image based on detected objects."
+    )
+    parser.add_argument(
+        "--img-path",
+        dest="img_path",
+        required=True,
+        help="Specify the path to the input image",
+    )
+    parser.add_argument(
+        "--tokens",
+        dest="tokens",
+        default=[],
+        help="Specify tokens for cropping",
+    )
+    parser.add_argument(
+        "--class-thresholds",
+        dest="class_thresholds",
+        default={"table": 0.5, "table rotated": 0.5, "no object": 10},
+        help="Specify class thresholds",
+    )
+    parser.add_argument(
+        "--padding",
+        dest="padding",
+        type=int,
+        default=10,
+        help="Specify padding for cropping",
+    )
+    parser.add_argument(
+        "--output-dir",
+        dest="output_dir",
+        default="./outputs/tables/",
+        help="Specify the output directory for cropped tables",
+    )
+    parser.add_argument(
+        "--json-path",
+        dest="json_path",
+        required=True,
+        help="Specify the path of the json file containing the scan results",
+    )
+
+    parser.add_argument(
+        "--log-level",
+        dest="log_level",
+        default="INFO",
+        help="Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+    )
+
+    return parser.parse_args()
 
 
 class TableCropper:
-    def __init__(self, img_path, tokens, class_thresholds, padding=10):
+    def __init__(self, img_path, tokens, class_thresholds, json_path, padding=10):
         self.img_path = img_path
         self.tokens = tokens
         self.class_thresholds = class_thresholds
+        self.json_path = json_path
         self.padding = padding
 
     def crop_table(self, objects):
-        print("✨ Sentinel Table Cropper has started...")
+        try:
+            logging.info("✨ Sentinel Table Cropper has started...")
+            table_crops = []
+            for obj in objects:
+                if obj["score"] < self.class_thresholds[obj["label"]]:
+                    continue
 
-        table_crops = []
-        for obj in objects:
-            if obj["score"] < self.class_thresholds[obj["label"]]:
-                continue
+                cropped_table = {}
 
-            cropped_table = {}
-
-            bbox = obj["bbox"]
-            bbox = [
-                bbox[0] - self.padding,
-                bbox[1] - self.padding,
-                bbox[2] + self.padding,
-                bbox[3] + self.padding,
-            ]
-            image = Image.open(self.img_path).convert("RGB")
-            cropped_img = image.crop(bbox)
-
-            table_tokens = [
-                token for token in self.tokens if self.iob(token["bbox"], bbox) >= 0.5
-            ]
-            for token in table_tokens:
-                token["bbox"] = [
-                    token["bbox"][0] - bbox[0],
-                    token["bbox"][1] - bbox[1],
-                    token["bbox"][2] - bbox[0],
-                    token["bbox"][3] - bbox[1],
+                bbox = obj["bbox"]
+                bbox = [
+                    bbox[0] - self.padding,
+                    bbox[1] - self.padding,
+                    bbox[2] + self.padding,
+                    bbox[3] + self.padding,
                 ]
+                image = Image.open(self.img_path).convert("RGB")
+                cropped_img = image.crop(bbox)
 
-            # If table is predicted to be rotated, rotate cropped image and tokens/words:
-            if obj["label"] == "table rotated":
-                cropped_img = cropped_img.rotate(270, expand=True)
+                table_tokens = [
+                    token
+                    for token in self.tokens
+                    if self.iob(token["bbox"], bbox) >= 0.5
+                ]
                 for token in table_tokens:
-                    bbox = token["bbox"]
-                    bbox = [
-                        cropped_img.size[0] - bbox[3] - 1,
-                        bbox[0],
-                        cropped_img.size[0] - bbox[1] - 1,
-                        bbox[2],
+                    token["bbox"] = [
+                        token["bbox"][0] - bbox[0],
+                        token["bbox"][1] - bbox[1],
+                        token["bbox"][2] - bbox[0],
+                        token["bbox"][3] - bbox[1],
                     ]
-                    token["bbox"] = bbox
 
-            cropped_table["image"] = cropped_img
-            cropped_table["tokens"] = table_tokens
+                # If table is predicted to be rotated, rotate cropped image and tokens/words:
+                if obj["label"] == "table rotated":
+                    cropped_img = cropped_img.rotate(270, expand=True)
+                    for token in table_tokens:
+                        bbox = token["bbox"]
+                        bbox = [
+                            cropped_img.size[0] - bbox[3] - 1,
+                            bbox[0],
+                            cropped_img.size[0] - bbox[1] - 1,
+                            bbox[2],
+                        ]
+                        token["bbox"] = bbox
 
-            table_crops.append(cropped_table)
+                cropped_table["image"] = cropped_img
+                cropped_table["tokens"] = table_tokens
 
-        return table_crops
+                table_crops.append(cropped_table)
+
+            return table_crops
+        except KeyboardInterrupt:
+            logging.critical("\nExiting...")
+            sys.exit(0)
+        except Exception as e:
+            logging.error(f"There was an issue when cropping tables: {e}")
+            raise e
 
     def iob(self, bbox1, bbox2):
         # Implement your IOB (Intersection over Bounding Box) calculation here
         # This function is a placeholder and should be replaced with the actual calculation
         pass
 
+    def apply(self):
+        # load json file
+        if os.path.exists(self.json_path):
+            with open(self.json_path, "r") as json_file:
+                det_tables = json.load(json_file)
+                logging.debug("✔️ JSON file loaded")
+        else:
+            logging.error(f"File not found: {self.json_path}")
+            sys.exit(1)
+
+        tables_crops = table_cropper.crop_table(det_tables["data"])
+
+        # Provide a file path for save, not just a directory
+        os.makedirs(args.output_dir, exist_ok=True)
+
+        for index, table in enumerate(tables_crops):
+            cropped_table = table["image"].convert("RGB")
+            # Save with a unique filename based on the index
+            file_name = os.path.splitext(os.path.basename(self.img_path))[0]
+            output_filename = f"{file_name}_cropped_table_{index}.png"
+            output_path = os.path.join(args.output_dir, output_filename)
+            cropped_table.save(output_path)
+
+        logging.info("✔️ Table cropped. output: {}".format(args.output_dir))
+
 
 if __name__ == "__main__":
-    tokens = []
-    detection_class_thresholds = {"table": 0.5, "table rotated": 0.5, "no object": 10}
-    det_tables = [
-        {
-            "label": "table",
-            "score": 0.9987866282463074,
-            "bbox": [
-                157.6197509765625,
-                1110.42919921875,
-                1410.814453125,
-                1244.0068359375,
-            ],
-        },
-        {
-            "label": "table",
-            "score": 0.9981938004493713,
-            "bbox": [
-                160.2030029296875,
-                1473.4356689453125,
-                1410.72607421875,
-                1912.1654052734375,
-            ],
-        },
-    ]
-    img_path = "./outputs/images/test_page_9.png"
-    table_cropper = TableCropper(img_path, tokens, detection_class_thresholds)
-    tables_crops = table_cropper.crop_table(det_tables)
-    # Provide a file path for save, not just a directory
-    output_dir = "./outputs/tables/"
-    os.makedirs(output_dir, exist_ok=True)
-    cropped_table = tables_crops[0]["image"].convert("RGB")
-    cropped_table.save(os.path.join(output_dir, "cropped_table.png"))
-    print("✔️ Table cropped. output: ./outputs/tables")
+    args = parse_args()
+
+    # Set up logging based on the command-line argument
+    logging.basicConfig(level=args.log_level.upper())
+
+    # Example usage:
+    table_cropper = TableCropper(
+        args.img_path, args.tokens, args.class_thresholds, args.json_path, args.padding
+    )
+
+    table_cropper.apply()
