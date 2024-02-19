@@ -32,6 +32,18 @@ def parse_args():
         help="an array of langauges that has to be supported to read the document. Example: ['en']",
     )
     parser.add_argument(
+        "--json",
+        dest="save the output as a json file",
+        default=False,
+        help="set the json output preference",
+    )
+    parser.add_argument(
+        "--output-path",
+        dest="specify the json path",
+        default="./outputs/parsed_tables_json",
+        help="set the output path of the json file",
+    )
+    parser.add_argument(
         "--log-level",
         dest="log_level",
         default="INFO",
@@ -41,9 +53,16 @@ def parse_args():
     return parser.parse_args()
 
 
-def table_reader(img_path, json_path, languages=["en"]):
+def table_reader(
+    img_path, json_path, languages=["en"], output_path="./outputs/parsed_tables"
+):
     try:
+        logging.info("✨ Sentinel Table Reader has started...")
+
         reader = easyocr.Reader(languages)
+
+        logging.debug("✔️  EasyOCR Model loaded.")
+        logging.debug(f"🟡 Model Language: {languages}")
 
         # load json file
         if os.path.exists(json_path):
@@ -61,9 +80,21 @@ def table_reader(img_path, json_path, languages=["en"]):
             sys.exit(1)
 
         cell_coordinates = get_cell_coordinates_by_row(cells)
-        # this needs to run only once to load the model into memory
 
+        # this needs to run only once to load the model into memory
         data = apply_ocr(img_path, cell_coordinates, reader)
+
+        # save output as a json file
+        if json:
+            image_name, image_ext = os.path.splitext(os.path.basename(img_path))
+
+            if not os.path.exists(output_path):
+                os.makedirs(output_path)
+
+            with open(f"{output_path}/{image_name}.json", "w") as json_file:
+                json.dump(data, json_file, indent=4)
+
+            logging.debug(f"✔️  json file created.")
 
         for row, row_data in data.items():
             logging.info(row_data)
