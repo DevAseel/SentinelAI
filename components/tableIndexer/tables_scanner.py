@@ -136,7 +136,7 @@ class TablesScanner:
                 with open(f"{self.json_path}/{image_name}.json", "w") as json_file:
                     json.dump(output, json_file, indent=4)
 
-                logging.debug(f"✔️  json file created.")
+                logging.debug(f"✔️  json file created")
 
             logging.info(f"{json.dumps(output, indent=2)}")
 

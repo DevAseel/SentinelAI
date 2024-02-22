@@ -60,12 +60,21 @@ def parse_args():
 
 
 class TableCropper:
-    def __init__(self, img_path, tokens, class_thresholds, json_path, padding=10):
+    def __init__(
+        self,
+        img_path,
+        json_path,
+        tokens=[],
+        class_thresholds={"table": 0.5, "table rotated": 0.5, "no object": 10},
+        padding=10,
+        output_dir="./outputs/tables",
+    ):
         self.img_path = img_path
+        self.json_path = json_path
         self.tokens = tokens
         self.class_thresholds = class_thresholds
-        self.json_path = json_path
         self.padding = padding
+        self.output_dir = output_dir
 
     def crop_table(self, objects):
         try:
@@ -141,20 +150,20 @@ class TableCropper:
             logging.error(f"File not found: {self.json_path}")
             sys.exit(1)
 
-        tables_crops = table_cropper.crop_table(det_tables["data"])
+        tables_crops = self.crop_table(det_tables["data"])
 
         # Provide a file path for save, not just a directory
-        os.makedirs(args.output_dir, exist_ok=True)
+        os.makedirs(self.output_dir, exist_ok=True)
 
         for index, table in enumerate(tables_crops):
             cropped_table = table["image"].convert("RGB")
             # Save with a unique filename based on the index
             file_name = os.path.splitext(os.path.basename(self.img_path))[0]
             output_filename = f"{file_name}_cropped_table_{index}.png"
-            output_path = os.path.join(args.output_dir, output_filename)
+            output_path = os.path.join(self.output_dir, output_filename)
             cropped_table.save(output_path)
 
-        logging.info("✔️ Table cropped. output: {}".format(args.output_dir))
+        logging.info("✔️ Table cropped. output: {}".format(self.output_dir))
 
 
 if __name__ == "__main__":
@@ -165,7 +174,7 @@ if __name__ == "__main__":
 
     # Example usage:
     table_cropper = TableCropper(
-        args.img_path, args.tokens, args.class_thresholds, args.json_path, args.padding
+        args.img_path, args.json_path, args.tokens, args.class_thresholds, args.padding
     )
 
     table_cropper.apply()

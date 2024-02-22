@@ -43,7 +43,7 @@ def parse_args():
 
 
 class TableMarker:
-    def __init__(self, img_path, json_path, output_path):
+    def __init__(self, img_path, json_path, output_path="./outputs/marked_tables"):
         self.img_path = img_path
         self.json_path = json_path
         self.output_path = output_path
@@ -68,6 +68,7 @@ class TableMarker:
 
             logging.debug("✔️  Image loaded.")
 
+            plt.clf()  # clear plt state
             plt.imshow(img, interpolation="lanczos")
             fig = plt.gcf()
             fig.set_size_inches(20, 20)

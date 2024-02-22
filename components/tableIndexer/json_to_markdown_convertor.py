@@ -3,6 +3,7 @@ from utils.logger import setup_logging
 import logging
 import json
 import sys
+import os
 
 
 def parse_args():
@@ -26,7 +27,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def json_to_markdown_table(json_path):
+def json_to_markdown_table(json_path, output_dir="./outputs/markdown"):
     logging.info("✨ Sentinel JSON to Markdown Convertor is starting...")
 
     # Load json file
@@ -38,6 +39,9 @@ def json_to_markdown_table(json_path):
         sys.exit(1)
 
     # Find the maximum number of columns
+    if not data:
+        return
+
     max_columns = max(len(row) for row in data.values())
 
     # Create header row
@@ -50,6 +54,23 @@ def json_to_markdown_table(json_path):
         rows += "| " + " | ".join(data[str(idx)]) + " |\n"
 
     markdown = header + separator + rows
+
+    # Check if the output directory exists, create it if not
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # Build the full path for the output Markdown file using the input JSON file name
+    json_filename = os.path.splitext(os.path.basename(json_path))[0]
+    output_md_path = os.path.join(output_dir, f"{json_filename}.md")
+
+    # Write the markdown to the specified output file
+    try:
+        with open(output_md_path, "w") as output_file:
+            output_file.write(markdown)
+        logging.debug(f"Markdown content saved to {output_md_path}")
+    except Exception as e:
+        logging.error(f"There was an issue when saving the Markdown content: {e}")
+        sys.exit(1)
 
     logging.info(markdown)
 

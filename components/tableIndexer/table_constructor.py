@@ -58,7 +58,14 @@ def parse_args():
     return parser.parse_args()
 
 
-def table_constructor(img_path, model_name, device, output_directory, json, json_path):
+def table_constructor(
+    img_path,
+    model_name,
+    device,
+    output_directory="./outputs/constructed_tables",
+    json=False,
+    json_path="./outputs/constructed_tables_json",
+):
     try:
         logging.info("✨ Sentinel Table Constructor has started...")
 
