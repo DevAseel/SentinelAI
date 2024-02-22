@@ -30,7 +30,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def convert_pdf_to_images(pdf_name, output_directory="./outputs/images") -> None:
+def convert_pdf_to_images(pdf_name, output_directory="./outputs/images"):
     pdf_path = Path("./pdfs") / f"{pdf_name}.pdf"
     output_directory = Path(output_directory)
 
@@ -46,6 +46,15 @@ def convert_pdf_to_images(pdf_name, output_directory="./outputs/images") -> None
             output_path = output_directory / img_name
             pdf_to_images[idx].save(output_path, "PNG")
             logging.debug(f"📄{img_name} ✔️")
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+
+        logging.info(
+            f"🔥Successfully converted PDF to images, output folder is: {output_directory}"
+        )
+        logging.debug(f"⏱ Time taken: {elapsed_time:.2f} seconds")
+
+        return len(pdf_to_images)
 
     except KeyboardInterrupt:
         logging.critical("\nExiting...")
@@ -53,14 +62,6 @@ def convert_pdf_to_images(pdf_name, output_directory="./outputs/images") -> None
 
     except Exception as e:
         logging.error(f"❌ Error converting PDF: {e}")
-
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-
-    logging.info(
-        f"🔥Successfully converted PDF to images, output folder is: {output_directory}"
-    )
-    logging.debug(f"⏱ Time taken: {elapsed_time:.2f} seconds")
 
 
 if __name__ == "__main__":
