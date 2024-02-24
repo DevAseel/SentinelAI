@@ -17,6 +17,7 @@ def parse_args():
         dest="log_level",
         default="INFO",
         help="Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
     )
     parser.add_argument(
         "--pdf-name", dest="pdf_name", required=True, help="Specify the PDF file name"

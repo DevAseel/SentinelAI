@@ -21,6 +21,7 @@ def parse_args():
         dest="log_level",
         default="INFO",
         help="Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
     )
     parser.add_argument(
         "--img-path",
@@ -39,6 +40,7 @@ def parse_args():
         dest="device",
         default="cpu",
         help="Specify the device type to load the model (cpu, cuda, mkldnn, opengl, opencl, ideep, hip, msnpu",
+        choices=["cpu", "cuda", "mkldnn", "opengl", "opencl", "ideep", "hip", "msnpu"],
     )
     parser.add_argument(
         "--output-directory",
@@ -47,7 +49,7 @@ def parse_args():
         help="Specify the output directory for images",
     )
     parser.add_argument(
-        "--json", dest="json", default=False, help="Save output as a json file"
+        "--json", dest="json", action="store_true", help="Save output as a json file"
     )
     parser.add_argument(
         "--json-path",

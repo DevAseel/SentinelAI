@@ -15,6 +15,7 @@ def parse_args():
         dest="log_level",
         default="INFO",
         help="Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
     )
 
     parser.add_argument(
@@ -43,21 +44,19 @@ def json_to_markdown_table(json_path, output_dir="./outputs/markdown"):
         return
 
     max_columns = max(len(row) for row in data.values())
-
     # Create header row
-    header = "| " + " | ".join(data["0"]) + " |\n"
-    separator = "| " + " | ".join(["---"] * max_columns) + " |\n"
+    header = f"| {' | '.join(data['0'])} |\n"
+    separator = f"| {' | '.join(['---'] * max_columns)} |\n"
 
     # Create data rows
     rows = ""
     for idx in range(1, len(data)):
-        rows += "| " + " | ".join(data[str(idx)]) + " |\n"
+        rows += f"| {' | '.join(data[str(idx)])} |\n"
 
-    markdown = header + separator + rows
+        markdown = header + separator + rows
 
     # Check if the output directory exists, create it if not
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    os.makedirs(output_dir, exist_ok=True)
 
     # Build the full path for the output Markdown file using the input JSON file name
     json_filename = os.path.splitext(os.path.basename(json_path))[0]
@@ -73,8 +72,6 @@ def json_to_markdown_table(json_path, output_dir="./outputs/markdown"):
         sys.exit(1)
 
     logging.info(markdown)
-
-    return markdown
 
 
 if __name__ == "__main__":

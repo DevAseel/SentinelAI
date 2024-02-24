@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument(
         "--json",
         dest="save the output as a json file",
-        default=False,
+        action="store_true",
         help="set the json output preference",
     )
     parser.add_argument(
@@ -48,6 +48,7 @@ def parse_args():
         dest="log_level",
         default="INFO",
         help="Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
     )
 
     return parser.parse_args()
