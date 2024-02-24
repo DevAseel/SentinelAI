@@ -90,10 +90,6 @@ def main(pdf_name):
         logging.critical("\nExiting...")
         sys.exit(0)
 
-    except Exception as e:
-        logging.error(f"there was an error processing the pdf: {e}")
-        sys.exit(1)
-
 
 if __name__ == "__main__":
     args = parse_args()

@@ -143,13 +143,9 @@ class TableCropper:
 
     def apply(self):
         # load json file
-        if os.path.exists(self.json_path):
-            with open(self.json_path, "r") as json_file:
-                det_tables = json.load(json_file)
-                logging.debug("✔️ JSON file loaded")
-        else:
-            logging.error(f"File not found: {self.json_path}")
-            sys.exit(1)
+        with open(self.json_path, "r") as json_file:
+            det_tables = json.load(json_file)
+            logging.debug("✔️ JSON file loaded")
 
         tables_crops = self.crop_table(det_tables["data"])
 

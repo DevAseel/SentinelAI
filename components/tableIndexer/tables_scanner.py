@@ -131,8 +131,7 @@ class TablesScanner:
                     os.path.basename(self.img_path)
                 )
 
-                if not os.path.exists(self.json_path):
-                    os.makedirs(self.json_path)
+                os.makedirs(self.json_path, exist_ok=True)
 
                 with open(f"{self.json_path}/{image_name}.json", "w") as json_file:
                     json.dump(output, json_file, indent=4)

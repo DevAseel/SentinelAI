@@ -14,13 +14,12 @@ def get_cell_coordinates_by_row(table_data):
 
     # Function to find cell coordinates
     def find_cell_coordinates(row, column):
-        cell_bbox = [
+        return [
             column["bbox"][0],
             row["bbox"][1],
             column["bbox"][2],
             row["bbox"][3],
         ]
-        return cell_bbox
 
     # Generate cell coordinates and count cells in each row
     cell_coordinates = []
@@ -47,7 +46,7 @@ def get_cell_coordinates_by_row(table_data):
 
 def apply_ocr(img_path, cell_coordinates, reader):
     # let's OCR row by row
-    data = dict()
+    data = {}
     max_num_columns = 0
     for idx, row in enumerate(tqdm(cell_coordinates)):
         row_text = []

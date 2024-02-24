@@ -71,11 +71,7 @@ def table_constructor(
     try:
         logging.info("✨ Sentinel Table Constructor has started...")
 
-        try:
-            model = TableTransformerForObjectDetection.from_pretrained(model_name)
-        except Exception as e:
-            logging.error(f"There was an issue when loading the model: {e}")
-            sys.exit(1)
+        model = TableTransformerForObjectDetection.from_pretrained(model_name)
 
         logging.debug("✔️  Model Loaded")
         logging.debug(f"🟡 Model name: {model_name}")
@@ -117,8 +113,7 @@ def table_constructor(
         if json:
             image_name, image_ext = os.path.splitext(os.path.basename(img_path))
 
-            if not os.path.exists(json_path):
-                os.makedirs(json_path)
+            os.makedirs(json_path, exist_ok=True)
 
             with open(f"{json_path}/{image_name}.json", "w") as json_file:
                 js.dump(cells, json_file, indent=4)

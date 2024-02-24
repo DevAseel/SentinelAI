@@ -160,8 +160,9 @@ class TableMarker:
             plt.gcf().set_size_inches(10, 10)
             plt.axis("off")
             img_name, img_ext = os.path.splitext(os.path.basename(self.img_path))
-            if not os.path.exists(self.output_path):
-                os.makedirs(self.output_path)
+
+            os.makedirs(self.output_path, exist_ok=True)
+
             plt.savefig(
                 f"{self.output_path}/marked_{img_name}.png",
                 bbox_inches="tight",

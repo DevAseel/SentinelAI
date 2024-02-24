@@ -66,19 +66,9 @@ def table_reader(
         logging.debug(f"🟡 Model Language: {languages}")
 
         # load json file
-        if os.path.exists(json_path):
-            try:
-                with open(json_path, "r") as json_file:
-                    cells = json.load(json_file)
-                    logging.debug("✔️ JSON file loaded")
-
-            except Exception as e:
-                logging.error(f" There was an error loading the json file: {e}")
-                sys.exit(1)
-
-        else:
-            logging.error(f"File not found: {json_path}")
-            sys.exit(1)
+        with open(json_path, "r") as json_file:
+            cells = json.load(json_file)
+            logging.debug("✔️ JSON file loaded")
 
         cell_coordinates = get_cell_coordinates_by_row(cells)
 
@@ -89,16 +79,18 @@ def table_reader(
         if json:
             image_name, image_ext = os.path.splitext(os.path.basename(img_path))
 
-            if not os.path.exists(output_path):
-                os.makedirs(output_path)
+            os.makedirs(output_path, exist_ok=True)
 
             with open(f"{output_path}/{image_name}.json", "w") as json_file:
                 json.dump(data, json_file, indent=4)
 
             logging.debug(f"✔️  json file created.")
 
-        for row, row_data in data.items():
+        for row_data in data.values():
             logging.info(row_data)
+
+    except FileNotFoundError as e:
+        logging.error(f"file was not found: {e}")
 
     except KeyboardInterrupt:
         logging.critical("\nExiting...")
