@@ -19,9 +19,9 @@ def parse_args():
     parser.add_argument(
         "--log-level",
         dest="log_level",
-        default="INFO",
-        help="Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="info",
+        help="Set the logging level (debug, info, warning, error, critical)",
+        choices=["debug", "info", "warning", "error", "critical"],
     )
     parser.add_argument(
         "--img-path",
@@ -156,7 +156,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     # Set up logging based on the command-line argument
-    setup_logging(args.log_level.upper())
+    setup_logging(args.log_level)
 
     # Example usage:
     table_detector = TablesScanner(args.img_path)

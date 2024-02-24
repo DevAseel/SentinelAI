@@ -15,9 +15,9 @@ def parse_args():
     parser.add_argument(
         "--log-level",
         dest="log_level",
-        default="INFO",
-        help="Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="info",
+        help="Set the logging level (debug, info, warning, error, critical)",
+        choices=["debug", "info", "warning", "error", "critical"],
     )
     parser.add_argument(
         "--pdf-name", dest="pdf_name", required=True, help="Specify the PDF file name"
@@ -32,7 +32,9 @@ def parse_args():
 
 
 def convert_pdf_to_images(pdf_name, output_directory="./outputs/images"):
-    pdf_path = Path("./pdfs") / f"{pdf_name}.pdf"
+    if not pdf_name.lower().endswith(".pdf"):
+        pdf_name += ".pdf"
+    pdf_path = Path("./pdfs") / pdf_name
     output_directory = Path(output_directory)
 
     os.makedirs(output_directory, exist_ok=True)
@@ -42,6 +44,8 @@ def convert_pdf_to_images(pdf_name, output_directory="./outputs/images"):
 
     try:
         pdf_to_images = convert_from_path(pdf_path)
+        if pdf_name.lower().endswith(".pdf"):
+            pdf_name = pdf_name[:-4]
         for idx in range(len(pdf_to_images)):
             img_name = f"{pdf_name}_page_{idx + 1}.png"
             output_path = output_directory / img_name
@@ -69,7 +73,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     # Set up colorful logging based on the command-line argument
-    setup_logging(args.log_level.upper())
+    setup_logging(args.log_level)
 
     # Example usage:
     convert_pdf_to_images(

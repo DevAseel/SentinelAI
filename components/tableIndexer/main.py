@@ -17,8 +17,9 @@ def parse_args():
     parser.add_argument(
         "--log-level",
         dest="log_level",
-        default="INFO",
-        help="Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+        default="info",
+        help="Set the logging level (debug, info, warning, error, critical)",
+        choices=["debug", "info", "warning", "error", "critical"],
     )
     parser.add_argument(
         "--pdf-name", dest="pdf_name", required=True, help="Specify the PDF file name"
@@ -98,6 +99,6 @@ if __name__ == "__main__":
     args = parse_args()
 
     # set up colorful logging based on the command-line argument
-    setup_logging(args.log_level.upper())
+    setup_logging(args.log_level)
 
     main(pdf_name=args.pdf_name)
