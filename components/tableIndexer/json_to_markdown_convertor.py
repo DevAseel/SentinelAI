@@ -49,11 +49,12 @@ def json_to_markdown_table(json_path, output_dir="./outputs/markdown"):
     separator = f"| {' | '.join(['---'] * max_columns)} |\n"
 
     # Create data rows
-    rows = ""
+    rows = []
     for idx in range(1, len(data)):
-        rows += f"| {' | '.join(data[str(idx)])} |\n"
+        row = f"| {' | '.join(data[str(idx)])} |\n"
+        rows.append(row)
 
-        markdown = header + separator + rows
+    markdown = header + separator + "".join(rows)
 
     # Check if the output directory exists, create it if not
     os.makedirs(output_dir, exist_ok=True)
