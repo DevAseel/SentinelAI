@@ -8,15 +8,8 @@ from json_to_markdown_convertor import json_to_markdown_table
 from utils.logger import setup_logging
 import logging
 import argparse
-from config import (
-    table_detection_score_threshold,
-    table_detection_model_repository,
-    table_crop_padding,
-    table_transformer_model_repository,
-    table_transformer_model_device_type,
-    table_reader_languages,
-)
 import sys
+from config import SETTINGS
 
 
 def parse_args():
@@ -45,14 +38,14 @@ def main(pdf_name):
             # instantiate the tables scanner class
             tables_scanner = TablesScanner(
                 img_path=f"./outputs/images/{pdf_name}_page_{i+1}.png",
-                model_name=table_detection_model_repository,
+                model_name=SETTINGS.table_detection_model_repository,
                 json=True,
             )
             scanning_results = tables_scanner.scan_tables()
             number_of_tables = scanning_results["tables detected"]
 
             for data in scanning_results["data"]:
-                if data["score"] >= table_detection_score_threshold:
+                if data["score"] >= SETTINGS.table_detection_score_threshold:
                     scanned_tables_data.append(
                         {"page_number": i + 1, "number_of_tables": number_of_tables}
                     )
@@ -70,22 +63,22 @@ def main(pdf_name):
             TableCropper(
                 img_path=f"./outputs/images/{pdf_name}_page_{table_data['page_number']}.png",
                 json_path=f"./outputs/scanned_tables_json/{pdf_name}_page_{table_data['page_number']}.json",
-                padding=table_crop_padding,
+                padding=SETTINGS.table_crop_padding,
             ).apply()
 
             for j in range(table_data["number_of_tables"]):
                 # construct each table for each pdf
                 table_constructor(
                     img_path=f"./outputs/tables/{pdf_name}_page_{table_data['page_number']}_cropped_table_{j}.png",
-                    model_name=table_transformer_model_repository,
-                    device=table_transformer_model_device_type,
+                    model_name=SETTINGS.table_transformer_model_repository,
+                    device=SETTINGS.device_type,
                     json=True,
                 )
                 # read each table
                 table_reader(
                     img_path=f"./outputs/tables/{pdf_name}_page_{table_data['page_number']}_cropped_table_{j}.png",
                     json_path=f"./outputs/constructed_tables_json/{pdf_name}_page_{table_data['page_number']}_cropped_table_{j}.json",
-                    languages=table_reader_languages,
+                    languages=SETTINGS.table_reader_languages,
                 )
                 # save as markdown
                 json_to_markdown_table(
