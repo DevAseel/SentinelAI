@@ -1,31 +1,9 @@
-import argparse
 from utils.logger import setup_logging
 import logging
 import json
 import sys
 import os
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Convert parsed table from json format to markdown format"
-    )
-    parser.add_argument(
-        "--log-level",
-        dest="log_level",
-        default="info",
-        help="Set the logging level (debug, info, warning, error, critical)",
-        choices=["debug", "info", "warning", "error", "critical"],
-    )
-
-    parser.add_argument(
-        "--json-path",
-        dest="json_path",
-        required=True,
-        help="Set the path of the parsed json table",
-    )
-
-    return parser.parse_args()
+from args.json_to_markdown_convertor_args import parse_args
 
 
 def json_to_markdown_table(json_path, output_dir="./outputs/markdown"):

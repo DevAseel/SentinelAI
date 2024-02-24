@@ -7,24 +7,9 @@ from table_reader import table_reader
 from json_to_markdown_convertor import json_to_markdown_table
 from utils.logger import setup_logging
 import logging
-import argparse
 import sys
 from config import SETTINGS
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(description="Extract and parse tables from pdfs.")
-    parser.add_argument(
-        "--log-level",
-        dest="log_level",
-        default="info",
-        help="Set the logging level (debug, info, warning, error, critical)",
-        choices=["debug", "info", "warning", "error", "critical"],
-    )
-    parser.add_argument(
-        "--pdf-name", dest="pdf_name", required=True, help="Specify the PDF file name"
-    )
-    return parser.parse_args()
+from args.main_args import parse_args
 
 
 def main(pdf_name):
